@@ -14,6 +14,7 @@ node ('docker') {
             curl https://glide.sh/get | sh
             glide --no-color install --strip-vendor
             CGO_ENABLED=0
+            GOOS=linux
             go build \
                 -o aws-signing-proxy \
                 github.com/coreos/aws-signing-proxy
