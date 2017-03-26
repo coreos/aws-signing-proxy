@@ -22,6 +22,7 @@ node ('docker') {
     stage('push') {
         docker.withRegistry('https://quay.io/v1/', 'tectonic-quay-robot') {
             def app = docker.build "quay.io/coreos/aws-signing-proxy:${gitSha}"
+            app.push()
             app.push 'latest'
         }
     }
