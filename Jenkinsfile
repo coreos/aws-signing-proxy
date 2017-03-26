@@ -1,8 +1,8 @@
 #!/usr/bin/env groovy
 node ('docker') {
+    checkout scm
+    def gitSha= sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
     stage('build'){
-        checkout scm
-        def gitSha= sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
         def projectPath = '/go/src/github.com/coreos/aws-signing-proxy'
         def runArgs = "-v ${env.WORKSPACE}:${projectPath} -v /etc/passwd:/etc/passwd:ro -e GOPATH=/go"
         docker.image('golang:1.8').inside(runArgs) {
