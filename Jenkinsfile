@@ -1,24 +1,28 @@
 #!/usr/bin/env groovy
 node ('docker') {
-    checkout scm
-    def gitSha= sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
-    def projectPath = '/go/src/github.com/coreos/aws-signing-proxy'
-    def runArgs = "-v ${env.WORKSPACE}:${projectPath} -v /etc/passwd:/etc/passwd:ro -e GOPATH=/go"
-    docker.image('golang:1.8').inside(runArgs) {
-        sh '''
-        mkdir -p $GOPATH/bin
-        mkdir -p $GOPATH/pkg
-        cd $GOPATH/src/github.com/coreos/aws-signing-proxy
+    stage('build'){
+        checkout scm
+        def gitSha= sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
+        def projectPath = '/go/src/github.com/coreos/aws-signing-proxy'
+        def runArgs = "-v ${env.WORKSPACE}:${projectPath} -v /etc/passwd:/etc/passwd:ro -e GOPATH=/go"
+        docker.image('golang:1.8').inside(runArgs) {
+            sh '''
+            mkdir -p $GOPATH/bin
+            mkdir -p $GOPATH/pkg
+            cd $GOPATH/src/github.com/coreos/aws-signing-proxy
 
-        curl https://glide.sh/get | sh
-        glide --debug --no-color install --strip-vendor
-        go build \
-            -o aws-signing-proxy \
-            github.com/coreos/aws-signing-proxy
-        '''
+            curl https://glide.sh/get | sh
+            glide --debug --no-color install --strip-vendor
+            go build \
+                -o aws-signing-proxy \
+                github.com/coreos/aws-signing-proxy
+            '''
+        }
     }
-    docker.withRegistry('https://quay.io/v1/', 'tectonic-quay-robot') {
-        def app = docker.build "quay.io/coreos/aws-signing-proxy:${gitSha}"
-        app.push 'latest'
+    stage('push') {
+        docker.withRegistry('https://quay.io/v1/', 'tectonic-quay-robot') {
+            def app = docker.build "quay.io/coreos/aws-signing-proxy:${gitSha}"
+            app.push 'latest'
+        }
     }
 }
