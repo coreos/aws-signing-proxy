@@ -12,7 +12,8 @@ node ('docker') {
             cd $GOPATH/src/github.com/coreos/aws-signing-proxy
 
             curl https://glide.sh/get | sh
-            glide --debug --no-color install --strip-vendor
+            glide --no-color install --strip-vendor
+            CGO_ENABLED=0
             go build \
                 -o aws-signing-proxy \
                 github.com/coreos/aws-signing-proxy
