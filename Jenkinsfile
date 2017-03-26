@@ -16,6 +16,7 @@ node ('docker') {
             CGO_ENABLED=0
             GOOS=linux
             go build \
+                -ldflags "-linkmode external -extldflags -static" \
                 -o aws-signing-proxy \
                 github.com/coreos/aws-signing-proxy
             '''
