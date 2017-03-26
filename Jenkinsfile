@@ -26,7 +26,10 @@ node ('docker') {
         docker.withRegistry('https://quay.io/v1/', 'tectonic-quay-robot') {
             def app = docker.build "quay.io/coreos/aws-signing-proxy:${gitSha}"
             app.push()
-            app.push 'latest'
+            app.push(env.BRANCH_NAME)
+            if (env.BRANCH_NAME == 'master') {
+                app.push 'latest'
+            }
         }
     }
 }
